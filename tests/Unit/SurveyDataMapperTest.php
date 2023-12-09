@@ -58,28 +58,6 @@ class SurveyDataMapperTest extends TestCase
         $this->assertEquals('numeric', $surveys[0]['questions'][1]['type']);
     }
 
-    public function testGetSurveyById()
-    {
-        $sampleSurveyData = [
-            [
-                "survey" => ["name" => "Paris", "code" => "XX1"],
-                "questions" => [
-                    ["type" => "qcm", "label" => "Best sellers", "options" => ["Product 1", "Product 2"], "answer" => [false, true]],
-                    ["type" => "numeric", "label" => "Number of products?", "options" => null, "answer" => 670]
-                ]
-            ],
-        ];
-
-        $this->mock(SurveyDataMapper::class, function ($mock) use ($sampleSurveyData) {
-            $mock->shouldReceive('getAllSurveys')->andReturn($sampleSurveyData);
-        });
-
-        $survey = $this->surveyDataMapper->getSurveyById('XX1');
-        $this->assertIsArray($survey);
-        $this->assertEquals('Paris', $survey['survey']['name']);
-        $this->assertEquals('XX1', $survey['survey']['code']);
-    }
-
     public function testGetSurveysByType()
     {
         $sampleSurveyData = [

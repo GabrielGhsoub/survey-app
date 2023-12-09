@@ -14,24 +14,36 @@ class SurveyService
         $this->dataMapper = $dataMapper;
     }
 
-    public function getAggregatedDataForSurvey($surveyId)
+    public function getAggregatedDataForSurvey($surveyCode)
     {
-        $surveyData = $this->dataMapper->getSurveyById($surveyId);
+        $allSurveys = $this->dataMapper->getSurveysByCode($surveyCode);
+        $aggregatedData = [
+            'qcm' => [],
+            'numeric' => 0
+        ];
 
-        if ($surveyData === null) {
-            return null;
-        }
+        $numericCount = 0;
 
-        $questions = $surveyData['questions']; // Assuming the questions are under the 'questions' key
-
-        $aggregatedData = [];
-        foreach ($questions as $data) {
-            if (isset($data['type'])) {
-                $strategy = $this->getStrategy($data['type']);
-                if ($strategy) {
-                    $aggregatedData[$data['type']][] = $strategy->aggregateData([$data]);
+        foreach ($allSurveys as $survey) {
+            foreach ($survey['questions'] as $question) {
+                if ($question['type'] === 'qcm') {
+                    foreach ($question['options'] as $index => $option) {
+                        if (!isset($aggregatedData['qcm'][$option])) {
+                            $aggregatedData['qcm'][$option] = 0;
+                        }
+                        if ($question['answer'][$index]) {
+                            $aggregatedData['qcm'][$option]++;
+                        }
+                    }
+                } elseif ($question['type'] === 'numeric') {
+                    $aggregatedData['numeric'] += $question['answer'];
+                    $numericCount++;
                 }
             }
+        }
+
+        if ($numericCount > 0) {
+            $aggregatedData['numeric'] /= $numericCount;
         }
 
         return $aggregatedData;

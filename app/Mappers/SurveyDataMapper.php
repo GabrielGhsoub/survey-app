@@ -10,7 +10,7 @@ class SurveyDataMapper
     public function getAllSurveys()
     {
         $surveys = [];
-        $files = Storage::disk('local')->files('data'); // 'local' is the disk, 'data' is the directory
+        $files = Storage::disk('local')->files('data');
 
         foreach ($files as $file) {
             if (substr($file, -5) !== '.json') {
@@ -34,15 +34,18 @@ class SurveyDataMapper
 
         return $surveys;
     }
-    public function getSurveyById($id)
+    public function getSurveysByCode($code)
     {
         $allSurveys = $this->getAllSurveys();
+        $surveysWithCode = [];
+
         foreach ($allSurveys as $surveyData) {
-            if (isset($surveyData['survey']['code']) && $surveyData['survey']['code'] == $id) {
-                return $surveyData;
+            if (isset($surveyData['survey']['code']) && $surveyData['survey']['code'] == $code) {
+                $surveysWithCode[] = $surveyData;
             }
         }
-        return null;
+
+        return $surveysWithCode;
     }
 
 
