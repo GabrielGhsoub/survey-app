@@ -10,28 +10,26 @@ class SurveyDataMapper
     public function getAllSurveys()
     {
         $surveys = [];
-        $directory = storage_path('app/data');
-
-        $files = scandir($directory);
-        Log::info("Files in directory:", ['files' => $files]);
+        $files = Storage::disk('local')->files('data'); // 'local' is the disk, 'data' is the directory
 
         foreach ($files as $file) {
             if (substr($file, -5) !== '.json') {
                 continue;
             }
 
-            $path = $directory . DIRECTORY_SEPARATOR . $file;
-            Log::info("Processing file:", ['path' => $path]);
+            try {
+                $json = Storage::disk('local')->get($file);
+                $surveyData = json_decode($json, true);
 
-            $json = file_get_contents($path);
-            $surveyData = json_decode($json, true);
+                if (!$surveyData) {
+                    Log::error("JSON decode error: " . json_last_error_msg(), ['file' => $file]);
+                    continue;
+                }
 
-            if (!$surveyData) {
-                Log::error("JSON decode error: " . json_last_error_msg(), ['path' => $path]);
-                continue;
+                $surveys[] = $surveyData;
+            } catch (\Exception $e) {
+                Log::error("Error reading file: " . $e->getMessage(), ['file' => $file]);
             }
-
-            $surveys[] = $surveyData;
         }
 
         return $surveys;

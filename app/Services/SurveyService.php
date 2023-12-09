@@ -5,10 +5,8 @@ use App\Mappers\SurveyDataMapper;
 use App\Strategies\QuestionTypes\QcmStrategy;
 use App\Strategies\QuestionTypes\NumberStrategy;
 
-
 class SurveyService
 {
-
     protected $dataMapper;
 
     public function __construct(SurveyDataMapper $dataMapper)
@@ -31,7 +29,7 @@ class SurveyService
             if (isset($data['type'])) {
                 $strategy = $this->getStrategy($data['type']);
                 if ($strategy) {
-                    $aggregatedData[] = $strategy->aggregateData($data);
+                    $aggregatedData[$data['type']][] = $strategy->aggregateData([$data]);
                 }
             }
         }
@@ -54,5 +52,4 @@ class SurveyService
     {
         return $this->dataMapper->getAllSurveys();
     }
-
 }
